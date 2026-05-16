@@ -1,10 +1,11 @@
-name: Publish — Tag push
+name: Publish — Release published
 
 # ---------------------------------------------------------------------------
 # Publish orchestrator for itl-attestation-sdk
 #
-# Triggered by a tag push — created automatically by ci.yml (auto-tag job).
-# No GH_PAT required: GITHUB_TOKEN is used throughout.
+# Triggered when a GitHub Release is published (from create-release in ci.yml).
+# The release is created with GH_PAT so the release:published event fires.
+# Everything else (artifact download, PyPI publish) uses GITHUB_TOKEN only.
 #
 # Tag routing:
 #   vX.Y.Z               → PyPI      (stable, environment: pypi)
@@ -13,12 +14,11 @@ name: Publish — Tag push
 # Authentication: PyPI Trusted Publisher (OIDC) — no API tokens.
 # ---------------------------------------------------------------------------
 on:
-  push:
-    tags:
-      - "v[0-9]*.[0-9]*.[0-9]*"
+  release:
+    types: [published]
 
 concurrency:
-  group: publish-${{ github.ref_name }}
+  group: publish-${{ github.event.release.tag_name }}
   cancel-in-progress: false
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Extract version from tag
         id: ver
         run: |
-          TAG="${{ github.ref_name }}"
+          TAG="${{ github.event.release.tag_name }}"
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if [[ "$VERSION" == *"-"* ]]; then
