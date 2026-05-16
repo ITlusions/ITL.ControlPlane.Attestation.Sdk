@@ -1,0 +1,82 @@
+name: Publish — Release published
+
+# ---------------------------------------------------------------------------
+# Publish orchestrator for itl-attestation-sdk
+#
+# Triggered when a GitHub Release is published (from create-release in ci.yml).
+# Releases are created using GH_PAT so the release:published event fires.
+#
+# Authentication: PyPI Trusted Publisher (OIDC) — no API tokens.
+# ---------------------------------------------------------------------------
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+
+  resolve-version:
+    name: Resolve release version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      prerelease: ${{ steps.ver.outputs.prerelease }}
+    steps:
+      - name: Extract version from tag
+        id: ver
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: resolve-version
+    if: needs.resolve-version.outputs.prerelease == 'false'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # OIDC Trusted Publisher
+    steps:
+      - name: Download wheel artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          workflow: ci.yml
+          commit: ${{ github.sha }}
+          name: sdk-wheel
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-testpypi:
+    name: Publish to TestPyPI (pre-release)
+    needs: resolve-version
+    if: needs.resolve-version.outputs.prerelease == 'true'
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write   # OIDC Trusted Publisher
+    steps:
+      - name: Download wheel artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          workflow: ci.yml
+          commit: ${{ github.sha }}
+          name: sdk-wheel
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
