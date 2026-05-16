@@ -28,8 +28,8 @@ pip install itl-attestation-sdk
 
 ```bash
 # Clone the repository
-git clone https://github.com/ITLusions/ITL.ControlPlane.Attestation.git
-cd ITL.ControlPlane.Attestation/src/sdk
+git clone https://github.com/ITLusions/ITL.ControlPlane.Attestation.Sdk.git
+cd ITL.ControlPlane.Attestation.Sdk
 
 # Install in editable mode with dev dependencies
 pip install -e ".[dev]"
@@ -109,10 +109,10 @@ print(f"Found {len(attested)} attested machines")
 
 ```
 sdk/
-├── core/                   # Core infrastructuur
+├── core/                   # Core infrastructure
 │   ├── config.py          # AttestationConfig (Pydantic BaseSettings)
 │   ├── database.py        # SQLAlchemy engine, async session factory
-│   ├── exceptions.py      # SDK excepties
+│   ├── exceptions.py      # SDK exception hierarchy
 │   └── __init__.py        # Core exports
 ├── models/                # ORM models (SQLModel)
 │   ├── machine.py         # MachineRow, NodeRole, MachineStatus
@@ -126,9 +126,9 @@ sdk/
 
 ```
 
-## Gebruik
+## Usage
 
-### Basis import
+### Basic import
 
 ```python
 from sdk import (
@@ -140,10 +140,10 @@ from sdk import (
     get_session,
 )
 
-# Configuratie
-print(config.db_url)  # sqlite:///d:/repos/.../data/machines.db
+# Configuration
+print(config.db_url)  # sqlite:///./data/machines.db
 
-# Database sessie
+# Database session
 async with get_session() as session:
     repo = SqlMachineRepository(session)
     machine = repo.get_by_id("a1b2c3d4-...")
@@ -155,7 +155,7 @@ async with get_session() as session:
 ```python
 from sdk.models import MachineRow, MachineStatus, NodeRole
 
-# Nieuwe machine aanmaken
+# Create a new machine
 machine = MachineRow(
     machine_id="a1b2c3d4-...",
     ek_fingerprint="SHA384:...",
@@ -222,8 +222,8 @@ Or via a `.env` file loaded with `python-dotenv`.
 
 ```bash
 # Clone and install
-git clone https://github.com/ITLusions/ITL.ControlPlane.Attestation.git
-cd ITL.ControlPlane.Attestation/src/sdk
+git clone https://github.com/ITLusions/ITL.ControlPlane.Attestation.Sdk.git
+cd ITL.ControlPlane.Attestation.Sdk
 pip install -e ".[dev]"
 ```
 

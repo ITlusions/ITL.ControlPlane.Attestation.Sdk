@@ -4,15 +4,19 @@
 
 ```
 src/sdk/
-├── pyproject.toml         # Package metadata, dependencies, build config
-├── README.md              # Documentation (shown on PyPI)
-├── CHANGELOG.md           # Version history
-├── LICENSE                # MIT License
-├── .gitignore             # Git ignore rules
 ├── __init__.py            # Package root with version and exports
 ├── core/                  # Core infrastructure
 ├── models/                # ORM models
 └── repositories/          # Data access layer
+```
+
+```
+(repo root)
+├── pyproject.toml         # Package metadata, dependencies, build config
+├── README.md              # Documentation (shown on PyPI)
+├── CHANGELOG.md           # Version history
+├── LICENSE                # MIT License
+└── .gitignore             # Git ignore rules
 ```
 
 ## Local Development
@@ -20,7 +24,7 @@ src/sdk/
 ### Install in editable mode
 
 ```bash
-cd d:\repos\ITL.ControlPlane.Attestation\src\sdk
+cd d:\repos\ITL.ControlPlane.Attestation.Sdk
 pip install -e ".[dev]"
 ```
 
@@ -46,7 +50,7 @@ pip install build twine
 ### Build wheel and sdist
 
 ```bash
-cd d:\repos\ITL.ControlPlane.Attestation\src\sdk
+cd d:\repos\ITL.ControlPlane.Attestation.Sdk
 python -m build
 ```
 
@@ -130,7 +134,7 @@ Add new version section:
 ### 3. Commit and tag
 
 ```bash
-git add src/sdk/__init__.py src/sdk/CHANGELOG.md
+git add src/sdk/__init__.py CHANGELOG.md
 git commit -m "chore: bump version to 0.2.0"
 git tag v0.2.0
 git push origin main --tags
@@ -139,7 +143,6 @@ git push origin main --tags
 ### 4. Build and publish
 
 ```bash
-cd src/sdk
 rm -rf dist/  # Clean old builds
 python -m build
 twine check dist/*
@@ -215,7 +218,7 @@ jobs:
 - **Version**: `0.1.0`
 - **License**: MIT
 - **Python**: `>=3.10`
-- **Homepage**: https://github.com/ITLusions/ITL.ControlPlane.Attestation
+- **Homepage**: https://github.com/ITLusions/ITL.ControlPlane.Attestation.Sdk
 - **Author**: ITLusions <info@itlusions.com>
 
 ## Dependencies
