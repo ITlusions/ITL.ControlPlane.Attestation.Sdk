@@ -1,19 +1,24 @@
-name: Publish — Release published
+name: Publish — Tag push
 
 # ---------------------------------------------------------------------------
 # Publish orchestrator for itl-attestation-sdk
 #
-# Triggered when a GitHub Release is published (from create-release in ci.yml).
-# Releases are created using GH_PAT so the release:published event fires.
+# Triggered by a tag push — created automatically by ci.yml (auto-tag job).
+# No GH_PAT required: GITHUB_TOKEN is used throughout.
+#
+# Tag routing:
+#   vX.Y.Z               → PyPI      (stable, environment: pypi)
+#   vX.Y.Z-{alpha|rc|…}  → TestPyPI  (pre-release, environment: testpypi)
 #
 # Authentication: PyPI Trusted Publisher (OIDC) — no API tokens.
 # ---------------------------------------------------------------------------
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v[0-9]*.[0-9]*.[0-9]*"
 
 concurrency:
-  group: publish-${{ github.event.release.tag_name }}
+  group: publish-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -21,6 +26,8 @@ jobs:
   resolve-version:
     name: Resolve release version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       version: ${{ steps.ver.outputs.version }}
       prerelease: ${{ steps.ver.outputs.prerelease }}
@@ -28,7 +35,7 @@ jobs:
       - name: Extract version from tag
         id: ver
         run: |
-          TAG="${{ github.event.release.tag_name }}"
+          TAG="${{ github.ref_name }}"
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if [[ "$VERSION" == *"-"* ]]; then
@@ -45,11 +52,12 @@ jobs:
     environment: pypi
     permissions:
       id-token: write   # OIDC Trusted Publisher
+      actions: read     # download artifact from ci.yml run
     steps:
       - name: Download wheel artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          github_token: ${{ secrets.GH_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: ci.yml
           commit: ${{ github.sha }}
           name: sdk-wheel
@@ -66,11 +74,12 @@ jobs:
     environment: testpypi
     permissions:
       id-token: write   # OIDC Trusted Publisher
+      actions: read     # download artifact from ci.yml run
     steps:
       - name: Download wheel artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          github_token: ${{ secrets.GH_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: ci.yml
           commit: ${{ github.sha }}
           name: sdk-wheel
@@ -80,3 +89,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+
