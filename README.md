@@ -1,5 +1,10 @@
 # ITL Attestation SDK
 
+![Status](https://img.shields.io/badge/status-alpha-orange?style=flat-square)
+![Development](https://img.shields.io/badge/development-in%20progress-yellow?style=flat-square)
+
+> **Alpha** — This project is under active development. APIs, data models, and behaviour may change without notice.
+
 **Shared models, repositories and core infrastructure for ITL Control Plane Machine Attestation services**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
