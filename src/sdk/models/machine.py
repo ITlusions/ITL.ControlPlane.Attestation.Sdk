@@ -70,6 +70,10 @@ class MachineRow(SQLModel, table=True):
     role: NodeRole = Field(default=NodeRole.worker_app)
     status: MachineStatus = Field(default=MachineStatus.pending_approval)
 
+    # Cluster this machine belongs to — allows a single attestation service
+    # instance to manage multiple independent clusters.
+    cluster_id: str = Field(default="default", index=True)
+
     hostname: str | None = Field(default=None)
     assigned_ip: str | None = Field(default=None)
 
